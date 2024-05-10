@@ -36,6 +36,7 @@ async function sendMail(base64Attachment, req, esCV) {
       text: "Hola mi nombre es "+req.name+" "+req.surname+" mi teléfono es "+req.phone+" y tengo "+req.age+" años"+" estoy aplicando para la sección de "+req.position+" te dejo mi email para contactarte conmigo "+req.email,
       attachments: [attachment]
     });
+    console.log(info.messageId)
   } else{
     let text = "Hola mi nombre es "+req.name+' '+req.surname
     if (req.phone){
@@ -51,6 +52,7 @@ async function sendMail(base64Attachment, req, esCV) {
       subject: req.subject,
       text: text
     });
+    console.log(info.messageId)
   }
 
   // send mail with defined transport object and the attachment
