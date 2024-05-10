@@ -63,24 +63,24 @@ app.use(express.json());
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
-app.post("/cv", (req, res) => {
+app.post("/cv", async (req, res) => {
   console.log(req.body);
   const { pdfString, recipient, name, surname, phone, age, position, email } = req.body;
   if (!pdfString || !recipient || !name || !surname || !phone || !age || !position|| !email) {
     return res.status(400).send("Missing required fields in request body");
   }
 
-  sendMail(req.body.pdfString, req.body , true, res);
+  await sendMail(req.body.pdfString, req.body , true, res);
   res.send("CV sent successfully!");
 });
 
-app.post("/contact", (req, res) => {
+app.post("/contact", async (req, res) => {
   console.log(req.body);
   const { recipient, name, surname, email, message, subject } = req.body;
   if (!recipient || !name || !surname ||!email || !message || !subject) {
     return res.status(400).send("Missing required fields in request body");
   }
-  sendMail("",req.body, false);
+  await sendMail("",req.body, false);
   res.send("Contact information sent successfully!");
 });
 
