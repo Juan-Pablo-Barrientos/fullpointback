@@ -18,7 +18,7 @@ const corsOptions = {
   origin: ['https://fullpoint.com.ar']
 };
 
-async function sendMail(base64Attachment, req, esCV) {
+async function sendMail(base64Attachment, req, esCV, res) {
   // Create a new attachment object
   let attachment = {}
   if (base64Attachment!=undefined){
@@ -36,7 +36,7 @@ async function sendMail(base64Attachment, req, esCV) {
       text: "Hola mi nombre es "+req.name+" "+req.surname+" mi teléfono es "+req.phone+" y tengo "+req.age+" años"+" estoy aplicando para la sección de "+req.position+" te dejo mi email para contactarte conmigo "+req.email,
       attachments: [attachment]
     });
-    console.log(info.messageId)
+    res.send("CV sent successfully!");
   } else{
     let text = "Hola mi nombre es "+req.name+' '+req.surname
     if (req.phone){
@@ -52,7 +52,7 @@ async function sendMail(base64Attachment, req, esCV) {
       subject: req.subject,
       text: text
     });
-    console.log(info.messageId)
+    res.send("Contact information sent successfully!");
   }
 
   // send mail with defined transport object and the attachment
@@ -72,8 +72,7 @@ app.post("/cv", (req, res) => {
     return res.status(400).send("Missing required fields in request body");
   }
 
-  sendMail(req.body.pdfString, req.body , true);
-  res.send("CV sent successfully!");
+  sendMail(req.body.pdfString, req.body , true, res);
 });
 
 app.post("/contact", (req, res) => {
@@ -83,7 +82,6 @@ app.post("/contact", (req, res) => {
     return res.status(400).send("Missing required fields in request body");
   }
   sendMail("",req.body, false);
-  res.send("Contact information sent successfully!");
 });
 
 app.get("/home", (req, res) => {
