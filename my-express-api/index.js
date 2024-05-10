@@ -36,7 +36,6 @@ async function sendMail(base64Attachment, req, esCV, res) {
       text: "Hola mi nombre es "+req.name+" "+req.surname+" mi teléfono es "+req.phone+" y tengo "+req.age+" años"+" estoy aplicando para la sección de "+req.position+" te dejo mi email para contactarte conmigo "+req.email,
       attachments: [attachment]
     });
-    res.send("CV sent successfully!");
   } else{
     let text = "Hola mi nombre es "+req.name+' '+req.surname
     if (req.phone){
@@ -52,7 +51,6 @@ async function sendMail(base64Attachment, req, esCV, res) {
       subject: req.subject,
       text: text
     });
-    res.send("Contact information sent successfully!");
   }
 
   // send mail with defined transport object and the attachment
@@ -73,6 +71,7 @@ app.post("/cv", (req, res) => {
   }
 
   sendMail(req.body.pdfString, req.body , true, res);
+  res.send("CV sent successfully!");
 });
 
 app.post("/contact", (req, res) => {
@@ -82,6 +81,7 @@ app.post("/contact", (req, res) => {
     return res.status(400).send("Missing required fields in request body");
   }
   sendMail("",req.body, false);
+  res.send("Contact information sent successfully!");
 });
 
 app.get("/home", (req, res) => {
