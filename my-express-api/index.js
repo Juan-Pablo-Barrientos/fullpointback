@@ -71,14 +71,7 @@ app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
 app.post("/cv", upload.single('cv'), async (req, res) => {
-  if (!req.file) {
-    return res.status(400).send("No file uploaded");
-  }
 
-  const { recipient, name, surname, phone, age, position, email } = req.body;
-  if (!recipient || !name || !surname || !phone || !age || !position || !email) {
-    return res.status(400).send("Missing required fields in request body");
-  }
 
   try {
     await sendMail(req.file, req.body, true, res);
