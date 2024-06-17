@@ -2,6 +2,11 @@ const express = require("express");
 const nodemailer = require("nodemailer");
 const cors = require('cors');
 require('dotenv').config();
+const multer = require('multer');
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 } // for example, limit to 5MB
+});
 var bodyParser = require('body-parser')
 
 const transporter = nodemailer.createTransport({
@@ -15,27 +20,29 @@ const transporter = nodemailer.createTransport({
 });
 
 const corsOptions = {
-  origin: ['https://fullpoint.com.ar']
+  origin: ['https://fullpoint.com.ar','http://localhost:4200/']
 };
 
-async function sendMail(base64Attachment, req, esCV, res) {
+async function sendMail(file, req, esCV, res) {
   // Create a new attachment object
   let attachment = {}
-  if (base64Attachment!=undefined){
+  if (file) {
     attachment = {
-      filename: 'cv.pdf',
-      content: base64Attachment,
-      encoding: 'base64' // Specify that the content is Base64 encoded
+      filename: file.originalname,
+      content: file.buffer,
+      contentType: file.mimetype
     };
   }
-  if (esCV){
+  if (esCV) {
     const info = await transporter.sendMail({
       from: 'fullpoint@srl.com',
       to: req.recipient,
       subject: "CV: " + req.surname + ", " + req.name,
-      text: "Hola mi nombre es "+req.name+" "+req.surname+" mi teléfono es "+req.phone+" y tengo "+req.age+" años"+" estoy aplicando para la sección de "+req.position+" te dejo mi email para contactarte conmigo "+req.email,
-      attachments: [attachment]
+      text: "Hola mi nombre es " + req.name + " " + req.surname + " mi teléfono es " + req.phone + " y tengo " + req.age + " años" + " estoy aplicando para la sección de " + req.position + " te dejo mi email para contactarte conmigo " + req.email,
+      attachments: file ? [attachment] : []
     });
+
+    console.log("Email sent: ", info.messageId);
   } else{
     let text = "Hola mi nombre es "+req.name+' '+req.surname
     if (req.phone){
@@ -63,15 +70,23 @@ app.use(express.json());
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
-app.post("/cv", async (req, res) => {
-  console.log(req.body);
-  const { pdfString, recipient, name, surname, phone, age, position, email } = req.body;
-  if (!pdfString || !recipient || !name || !surname || !phone || !age || !position|| !email) {
+app.post("/cv", upload.single('cv'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).send("No file uploaded");
+  }
+
+  const { recipient, name, surname, phone, age, position, email } = req.body;
+  if (!recipient || !name || !surname || !phone || !age || !position || !email) {
     return res.status(400).send("Missing required fields in request body");
   }
 
-  await sendMail(req.body.pdfString, req.body , true, res);
-  res.send("CV sent successfully!");
+  try {
+    await sendMail(req.file, req.body, true, res);
+    res.send("CV sent successfully!");
+  } catch (error) {
+    console.error("Error in /cv route:", error);
+    res.status(500).send("Error sending email");
+  }
 });
 
 app.post("/contact", async (req, res) => {
