@@ -20,7 +20,7 @@ const transporter = nodemailer.createTransport({
 });
 
 const corsOptions = {
-  origin: ['https://fullpoint.com.ar','http://localhost:4200/','*']
+  origin: ['https://fullpoint.com.ar']
 };
 
 async function sendMail(file, req, esCV, res) {
